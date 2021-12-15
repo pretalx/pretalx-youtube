@@ -1,5 +1,5 @@
 Youtube integration
-=================
+===================
 
 This is a plugin for `pretalx`_ that provides an integration with Youtube, allowing you to embed recordings on talk pages.
 
