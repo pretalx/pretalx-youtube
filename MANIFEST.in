@@ -1,0 +1,3 @@
+recursive-include pretalx_youtube/static *
+recursive-include pretalx_youtube/templates *
+recursive-include pretalx_youtube/locale *
