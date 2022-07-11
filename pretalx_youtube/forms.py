@@ -23,6 +23,8 @@ class YouTubeUrlForm(forms.Form):
 
     def clean_video_id(self):
         data = self.cleaned_data["video_id"]
+        if not data:
+            return data
         if "youtube.com" not in data:
             raise forms.ValidationError(_("Please provide a YouTube URL!"))
         try:
