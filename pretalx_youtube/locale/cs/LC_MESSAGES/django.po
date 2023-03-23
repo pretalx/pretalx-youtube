@@ -3,53 +3,56 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-17 23:58+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-03-23 08:38+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
 "<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: local/pretalx-youtube/pretalx_youtube/apps.py:10
 msgid "YouTube integration"
-msgstr ""
+msgstr "Integrace YouTube"
 
 #: local/pretalx-youtube/pretalx_youtube/apps.py:13
 msgid ""
 "Embed YouTube videos as session recordings, and retrieve them via an API."
 msgstr ""
+"Vkládejte YouTube videa se záznamy přednášek, a získejte je skrze API."
 
 #: local/pretalx-youtube/pretalx_youtube/forms.py:27
 msgid "Please provide a YouTube URL!"
-msgstr ""
+msgstr "Zadejte prosím URL adresu na YouTube!"
 
 #: local/pretalx-youtube/pretalx_youtube/forms.py:33
 msgid "Failed to parse the URL!"
-msgstr ""
+msgstr "URL adresu se nepodařilo přečíst!"
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:7
 msgid "Set up YouTube embeds"
-msgstr ""
+msgstr "Nastavení vkládání z YouTube"
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:20
 msgid ""
 "You will be able to add YouTube URLs to your sessions once you've created a "
 "schedule."
 msgstr ""
+"Po vytvoření programu budete moci přidávat URL adresy na YouTube ke svým "
+"přednáškám."
 
 #: local/pretalx-youtube/pretalx_youtube/views.py:28
 msgid "Could not find this talk."
-msgstr ""
+msgstr "Tuto přednášku se nepodařilo najít."
 
 #: local/pretalx-youtube/pretalx_youtube/views.py:37
 msgid "The URL for this talk was updated."
-msgstr ""
+msgstr "URL adresa pro tuto přednášku byla aktualizována."
