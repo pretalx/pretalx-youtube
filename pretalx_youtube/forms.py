@@ -7,7 +7,6 @@ from .models import YouTubeLink
 
 
 class YouTubeUrlForm(forms.Form):
-
     video_id = forms.URLField(required=False)
 
     def __init__(self, *args, **kwargs):
@@ -25,14 +24,21 @@ class YouTubeUrlForm(forms.Form):
         data = self.cleaned_data["video_id"]
         if not data:
             return data
-        if "youtube.com" not in data:
+        # Get ID from youtube.com and youtu.be URLs
+        if "youtube.com" in data:
+            try:
+                url = urlparse(data)
+                qs = parse_qs(url.query)
+                return qs["v"][0]
+            except Exception as e:
+                raise forms.ValidationError(_("Failed to parse the URL!") + f" {e}")
+        elif "youtu.be" in data:
+            try:
+                return data.split("/")[-1]
+            except Exception as e:
+                raise forms.ValidationError(_("Failed to parse the URL!") + f" {e}")
+        else:
             raise forms.ValidationError(_("Please provide a YouTube URL!"))
-        try:
-            url = urlparse(data)
-            qs = parse_qs(url.query)
-            return qs["v"][0]
-        except Exception as e:
-            raise forms.ValidationError(_("Failed to parse the URL!") + f" {e}")
 
     def save(self):
         video_id = self.cleaned_data.get("video_id")
