@@ -24,7 +24,7 @@ cmdclass = {"build": CustomBuild}
 
 setup(
     name="pretalx-youtube",
-    version="1.0.4",
+    version="1.1.0",
     description="Embed YouTube videos as session recordings",
     long_description=long_description,
     url="https://github.com/pretalx/pretalx-youtube",
