@@ -18,7 +18,7 @@ class YouTubeUrlForm(forms.Form):
             initial["video_id"] = f"https://youtube.com/watch?v={youtube.video_id}"
             kwargs["initial"] = initial
         super().__init__(*args, **kwargs)
-        self.fields["video_id"].label = self.submission.title
+        self.fields["video_id"].label = getattr(self.submission, "title", None)
 
     def clean_video_id(self):
         data = self.cleaned_data["video_id"]
