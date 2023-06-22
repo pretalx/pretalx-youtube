@@ -44,7 +44,7 @@ class YouTubeSettings(PermissionRequired, TemplateView):
         kwargs["url_forms"] = [
             YouTubeUrlForm(submission=slot.submission)
             for slot in self.request.event.current_schedule.talks.all()
-            .filter(is_visible=True)
+            .filter(is_visible=True, submission__isnull=False)
             .order_by("start")
         ]
         return kwargs
