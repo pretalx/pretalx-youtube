@@ -15,7 +15,7 @@ class YouTubeUrlForm(forms.Form):
         youtube = getattr(self.submission, "youtube_link", None)
         if youtube:
             initial = kwargs.get("initial", dict())
-            initial["video_id"] = f"https://youtube.com/watch?v={youtube.video_id}"
+            initial["video_id"] = youtube.youtube_link
             kwargs["initial"] = initial
         super().__init__(*args, **kwargs)
         self.fields["video_id"].label = getattr(self.submission, "title", None)
