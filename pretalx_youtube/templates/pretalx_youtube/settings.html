@@ -6,7 +6,38 @@
 
     <h2>{% trans "Set up YouTube embeds" %}</h2>
     {% if form %}
+        <div>
+            <h4>{% translate "Import" %}</h4>
+            <p>
+                {% blocktrans trimmed %}
+
+                    You can either import YouTube URLs from a CSV file or add
+                    them manually. For the file import, you will have to
+                    include a <code>video_id</code> (the part past the
+                    <code>?v=</code> in YouTube, though the full URL works too)
+                    and a <code>submission</code> column (the ID/code of the
+                    submission, e.g. DEXF88).
+
+                {% endblocktrans %}
+                <br>
+                {% blocktrans trimmed %}
+                    If you prefer, you can also use the <a href="https://github.com/pretalx/pretalx-youtube/#readme">API</a>.
+                {% endblocktrans %}
+            </p>
+            <form method="post" enctype="multipart/form-data" class="d-flex align-items-center
+                                                                    ">
+                {% csrf_token %}
+                {% bootstrap_field file_form.file layout='inline' %}
+                <button name="action" value="upload" type="submit" class="btn btn-outline-success btn-inline btn-sm mb-3">
+                    <i class="fa fa-check"></i> {% translate "Import URLs" %}
+                </button>
+            </form>
+        </div>
+        <hr>
         <form method="post">
+            <p>
+                <h4 class="mb-3">{% translate "Manually" %}</h4>
+            </p>
             {% csrf_token %}
             <div class="mr-5">
                 {% bootstrap_form form layout='event' %}

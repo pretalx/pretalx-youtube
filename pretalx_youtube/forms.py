@@ -7,6 +7,10 @@ from django.utils.translation import gettext_lazy as _
 from .models import YouTubeLink
 
 
+class FileUploadForm(forms.Form):
+    file = forms.FileField(label=_("File"))
+
+
 class YouTubeUrlForm(forms.Form):
     def __init__(self, *args, event, **kwargs):
         if not event.current_schedule:
