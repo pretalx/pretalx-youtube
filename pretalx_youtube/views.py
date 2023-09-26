@@ -1,17 +1,17 @@
 from django.contrib import messages
 from django.http import Http404, JsonResponse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
+from django.views.generic import FormView
 from pretalx.common.mixins.views import PermissionRequired
-from pretalx.submission.models import Submission
 
 from .forms import YouTubeUrlForm
 from .models import YouTubeLink
 
 
-class YouTubeSettings(PermissionRequired, TemplateView):
+class YouTubeSettings(PermissionRequired, FormView):
     permission_required = "orga.change_settings"
     template_name = "pretalx_youtube/settings.html"
+    form_class = YouTubeUrlForm
 
     def get_success_url(self):
         return self.request.path
@@ -19,38 +19,22 @@ class YouTubeSettings(PermissionRequired, TemplateView):
     def get_object(self):
         return self.request.event
 
-    def post(self, request, *args, **kwargs):
-        action = request.POST.get("action")
-        code = action[len("url_") :]
-        try:
-            submission = request.event.submissions.get(code=code)
-        except Submission.DoesNotExist:
-            messages.error(request, _("Could not find this talk."))
-            return super().get(request, *args, **kwargs)
-
-        form = YouTubeUrlForm(request.POST, submission=submission)
-        if not form.is_valid():
-            messages.error(request, form.errors)
-            return super().get(request, *args, **kwargs)
-        else:
-            form.save()
-            messages.success(request, _("The URL for this talk was updated."))
-            return super().get(request, *args, **kwargs)
-
-        return super().post(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
-        if self.request.event.current_schedule:
-            kwargs["url_forms"] = [
-                YouTubeUrlForm(submission=slot.submission)
-                for slot in self.request.event.current_schedule.talks.all()
-                .filter(is_visible=True, submission__isnull=False)
-                .order_by("start")
-            ]
-        else:
-            kwargs["url_forms"] = []
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["event"] = self.request.event
         return kwargs
+
+    def post(self, *args, **kwargs):
+        if not self.request.event.current_schedule:
+            messages.error(self.request, _("Please create a schedule first!"))
+            return self.get(self.request, *args, **kwargs)
+        form = self.get_form()
+        if not form.is_valid():
+            messages.error(self.request, _("Please fix the errors below."))
+            return self.get(self.request, *args, **kwargs)
+        form.save()
+        messages.success(self.request, _("The YouTube URLs were updated."))
+        return super().get(self.request, *args, **kwargs)
 
 
 def check_api_access(request):

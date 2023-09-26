@@ -5,23 +5,23 @@
 {% block content %}
 
     <h2>{% trans "Set up YouTube embeds" %}</h2>
-    {% for sform in url_forms %}
+    {% if form %}
         <form method="post">
             {% csrf_token %}
-            <button name="action" value="url_{{ sform.submission.code }}" type="submit" class="btn btn-info float-right">
-                <i class="fa fa-check"></i>
-            </button>
             <div class="mr-5">
-                {% bootstrap_form sform layout='event' %}
+                {% bootstrap_form form layout='event' %}
             </div>
+            <button type="submit" class="btn btn-success btn-lg float-right">
+                <i class="fa fa-check"></i> {% translate "Save" %}
+            </button>
         </form>
-    {% empty %}
-        <div class="alert alert-warning">
+    {% else %}
+        <div class="alert alert-info">
             {% blocktrans trimmed %}
                 You will be able to add YouTube URLs to your sessions once you've created a schedule.
             {% endblocktrans %}
         </div>
-    {% endfor %}
+    {% endif %}
 
 {% endblock %}
 

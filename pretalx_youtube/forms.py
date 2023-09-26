@@ -1,3 +1,4 @@
+import copy
 from urllib.parse import parse_qs, urlparse
 
 from django import forms
@@ -7,48 +8,60 @@ from .models import YouTubeLink
 
 
 class YouTubeUrlForm(forms.Form):
-    video_id = forms.URLField(required=False)
+    def __init__(self, *args, event, **kwargs):
+        if not event.current_schedule:
+            return super().__init__(*args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        self.submission = kwargs.pop("submission")
+        self.talks = (
+            event.current_schedule.talks.all()
+            .filter(is_visible=True, submission__isnull=False)
+            .order_by("start")
+        )
+        initial = kwargs.get("initial", dict())
+        youtube_data = {
+            v.submission.code: v.video_id
+            for v in YouTubeLink.objects.filter(submission__event=event)
+        }
+        for code, video_link in youtube_data.items():
+            initial[f"video_id_{code}"] = video_link
 
-        youtube = getattr(self.submission, "youtube_link", None)
-        if youtube:
-            initial = kwargs.get("initial", dict())
-            initial["video_id"] = youtube.youtube_link
-            kwargs["initial"] = initial
+        kwargs["initial"] = initial
         super().__init__(*args, **kwargs)
-        self.fields["video_id"].label = getattr(self.submission, "title", None)
 
-    def clean_video_id(self):
-        data = self.cleaned_data["video_id"]
-        if not data:
-            return data
-        # Get ID from youtube.com and youtu.be URLs
-        if "youtube.com" in data:
-            try:
-                url = urlparse(data)
-                qs = parse_qs(url.query)
-                return qs["v"][0]
-            except Exception as e:
-                raise forms.ValidationError(_("Failed to parse the URL!") + f" {e}")
-        elif "youtu.be" in data:
-            try:
-                return data.split("/")[-1]
-            except Exception as e:
-                raise forms.ValidationError(_("Failed to parse the URL!") + f" {e}")
-        else:
-            raise forms.ValidationError(_("Please provide a YouTube URL!"))
+        for talk in self.talks:
+            self.fields[f"video_id_{talk.submission.code}"] = forms.URLField(
+                required=False,
+                label=talk.submission.title,
+                widget=forms.TextInput(attrs={"placeholder": ""}),
+            )
+
+    def clean(self):
+        result = {}
+        for key, value in copy.copy(self.cleaned_data).items():
+            if not value:
+                result[key] = None
+            elif "youtube.com" in value:
+                try:
+                    url = urlparse(value)
+                    qs = parse_qs(url.query)
+                    result[key] = qs["v"][0]
+                except Exception:
+                    self.add_error(key, _("Failed to parse the URL!"))
+            elif "youtu.be" in value:
+                try:
+                    result[key] = value.split("/")[-1]
+                except Exception:
+                    self.add_error(key, _("Failed to parse the URL!"))
+            else:
+                self.add_error(key, _("Please provide a YouTube URL!"))
+        return result
 
     def save(self):
-        video_id = self.cleaned_data.get("video_id")
-        if video_id:
-            YouTubeLink.objects.update_or_create(
-                submission=self.submission, defaults={"video_id": video_id}
-            )
-        else:
-            YouTubeLink.objects.filter(submission=self.submission).delete()
-
-    class Meta:
-        model = YouTubeLink
-        fields = ("video_id",)
+        for talk in self.talks:
+            video_id = self.cleaned_data.get("video_id_{talk.submission.code}")
+            if video_id:
+                YouTubeLink.objects.update_or_create(
+                    submission=talk.submission, defaults={"video_id": video_id}
+                )
+            else:
+                YouTubeLink.objects.filter(submission=talk.submission).delete()
