@@ -12,27 +12,26 @@ class YouTubeUrlForm(forms.Form):
         if not event.current_schedule:
             return super().__init__(*args, **kwargs)
 
+        super().__init__(*args, **kwargs)
+
         self.talks = (
             event.current_schedule.talks.all()
             .filter(is_visible=True, submission__isnull=False)
             .order_by("start")
         )
-        initial = kwargs.get("initial", dict())
         youtube_data = {
             v.submission.code: v.youtube_link
             for v in YouTubeLink.objects.filter(submission__event=event)
         }
-        for code, video_link in youtube_data.items():
-            initial[f"video_id_{code}"] = video_link
-
-        kwargs["initial"] = initial
-        super().__init__(*args, **kwargs)
-
+        s = _("Go to video")
         for talk in self.talks:
+            link = youtube_data.get(talk.submission.code)
             self.fields[f"video_id_{talk.submission.code}"] = forms.URLField(
                 required=False,
                 label=talk.submission.title,
                 widget=forms.TextInput(attrs={"placeholder": ""}),
+                initial=link,
+                help_text=f'<a href="{link}" target="_blank">{s}</a>' if link else "",
             )
 
     def clean(self):
