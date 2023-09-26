@@ -23,15 +23,20 @@ class YouTubeUrlForm(forms.Form):
             v.submission.code: v.youtube_link
             for v in YouTubeLink.objects.filter(submission__event=event)
         }
-        s = _("Go to video")
+        s = _("Go to video.")
+        p = _("Go to talk page.")
         for talk in self.talks:
             link = youtube_data.get(talk.submission.code)
+            help_text = f'<a href="{talk.submission.urls.public.full()}" target="_blank">{p}</a>'
+            if link:
+                help_text += f' | <a href="{link}" target="_blank">{s}</a>'
+
             self.fields[f"video_id_{talk.submission.code}"] = forms.URLField(
                 required=False,
                 label=talk.submission.title,
                 widget=forms.TextInput(attrs={"placeholder": ""}),
                 initial=link,
-                help_text=f'<a href="{link}" target="_blank">{s}</a>' if link else "",
+                help_text=help_text,
             )
 
     def clean(self):
