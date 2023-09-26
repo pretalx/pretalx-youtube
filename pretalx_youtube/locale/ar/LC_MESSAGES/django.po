@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-17 23:58+0000\n"
+"POT-Creation-Date: 2023-09-25 12:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,12 +28,13 @@ msgid ""
 "Embed YouTube videos as session recordings, and retrieve them via an API."
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/forms.py:27
-msgid "Please provide a YouTube URL!"
+#: local/pretalx-youtube/pretalx_youtube/forms.py:34
+#: local/pretalx-youtube/pretalx_youtube/forms.py:39
+msgid "Failed to parse the URL!"
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/forms.py:33
-msgid "Failed to parse the URL!"
+#: local/pretalx-youtube/pretalx_youtube/forms.py:41
+msgid "Please provide a YouTube URL!"
 msgstr ""
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:7
