@@ -10,7 +10,7 @@ class PluginApp(AppConfig):
         name = gettext_lazy("YouTube integration")
         author = "Tobias Kunze"
         description = gettext_lazy(
-            "Embed YouTube videos as session recordings, and retrieve them via an API."
+            "Show YouTube videos embedded on talk pages. Set URLs manually or via API."
         )
         visible = True
         version = "1.3.0"

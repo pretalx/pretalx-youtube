@@ -35,34 +35,3 @@ class YouTubeSettings(PermissionRequired, FormView):
         form.save()
         messages.success(self.request, _("The YouTube URLs were updated."))
         return super().get(self.request, *args, **kwargs)
-
-
-def check_api_access(request):
-    if "pretalx_youtube" not in request.event.plugin_list:
-        raise Http404()
-    if not (
-        request.user.has_perm("agenda.view_schedule", request.event)
-        or request.user.has_perm("orga.view_submissions")
-    ):
-        raise Http404()
-
-
-def api_list(request, event):
-    check_api_access(request)
-    return JsonResponse(
-        {
-            "results": [
-                link.serialize()
-                for link in YouTubeLink.objects.filter(submission__event=request.event)
-            ]
-        }
-    )
-
-
-def api_single(request, event, code):
-    check_api_access(request)
-    submission = request.event.submissions.filter(code__iexact=code).first()
-    if not submission:
-        raise Http404()
-    link = getattr(submission, "youtube_link", None)
-    return JsonResponse(link.serialize() if link else {})

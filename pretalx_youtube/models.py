@@ -20,9 +20,3 @@ class YouTubeLink(models.Model):
     @property
     def iframe(self):
         return f'<div class="embed-responsive embed-responsive-16by9"><iframe src="{self.player_link}" frameborder="0" allowfullscreen></iframe></div>'
-
-    def serialize(self):
-        return {
-            "submission": self.submission.code,
-            "youtube_link": self.youtube_link,
-        }
