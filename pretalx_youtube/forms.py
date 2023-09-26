@@ -58,7 +58,7 @@ class YouTubeUrlForm(forms.Form):
 
     def save(self):
         for talk in self.talks:
-            video_id = self.cleaned_data.get("video_id_{talk.submission.code}")
+            video_id = self.cleaned_data.get(f"video_id_{talk.submission.code}")
             if video_id:
                 YouTubeLink.objects.update_or_create(
                     submission=talk.submission, defaults={"video_id": video_id}
