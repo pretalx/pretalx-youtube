@@ -13,7 +13,7 @@ class PluginApp(AppConfig):
             "Embed YouTube videos as session recordings, and retrieve them via an API."
         )
         visible = True
-        version = "1.2.2"
+        version = "1.3.0"
 
     def ready(self):
         from . import signals  # NOQA
