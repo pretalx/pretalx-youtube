@@ -19,7 +19,7 @@ class YouTubeUrlForm(forms.Form):
         )
         initial = kwargs.get("initial", dict())
         youtube_data = {
-            v.submission.code: v.video_id
+            v.submission.code: v.youtube_link
             for v in YouTubeLink.objects.filter(submission__event=event)
         }
         for code, video_link in youtube_data.items():
