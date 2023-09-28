@@ -13,7 +13,7 @@ class PluginApp(AppConfig):
             "Show YouTube videos embedded on talk pages. Set URLs manually or via API."
         )
         visible = True
-        version = "1.3.0"
+        version = "2.0.0"
 
     def ready(self):
         from . import signals  # NOQA
