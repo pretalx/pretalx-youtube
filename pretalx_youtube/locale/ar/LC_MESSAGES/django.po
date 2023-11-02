@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-25 12:10+0000\n"
+"POT-Creation-Date: 2023-10-03 12:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,15 +25,27 @@ msgstr ""
 
 #: local/pretalx-youtube/pretalx_youtube/apps.py:13
 msgid ""
-"Embed YouTube videos as session recordings, and retrieve them via an API."
+"Show YouTube videos embedded on talk pages. Set URLs manually or via API."
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/forms.py:34
-#: local/pretalx-youtube/pretalx_youtube/forms.py:39
+#: local/pretalx-youtube/pretalx_youtube/forms.py:11
+msgid "File"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/forms.py:30
+msgid "Go to video."
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/forms.py:31
+msgid "Go to talk page."
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/forms.py:57
+#: local/pretalx-youtube/pretalx_youtube/forms.py:62
 msgid "Failed to parse the URL!"
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/forms.py:41
+#: local/pretalx-youtube/pretalx_youtube/forms.py:64
 msgid "Please provide a YouTube URL!"
 msgstr ""
 
@@ -41,16 +53,63 @@ msgstr ""
 msgid "Set up YouTube embeds"
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:20
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:10
+msgid "Import"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:12
+msgid ""
+"You can either import YouTube URLs from a CSV file or add them manually. For "
+"the file import, you will have to include a <code>video_id</code> (the part "
+"past the <code>?v=</code> in YouTube, though the full URL works too) and a "
+"<code>submission</code> column (the ID/code of the submission, e.g. DEXF88)."
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:23
+msgid ""
+"If you prefer, you can also use the <a href=\"https://github.com/pretalx/"
+"pretalx-youtube/#readme\">API</a>."
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:32
+msgid "Import URLs"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:39
+msgid "Manually"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:46
+msgid "Save"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:51
 msgid ""
 "You will be able to add YouTube URLs to your sessions once you've created a "
 "schedule."
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/views.py:28
-msgid "Could not find this talk."
+#: local/pretalx-youtube/pretalx_youtube/views.py:37
+msgid "You need to select a file to upload!"
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/views.py:37
-msgid "The URL for this talk was updated."
+#: local/pretalx-youtube/pretalx_youtube/views.py:48
+msgid "You need to select a JSON or CSV file to upload!"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/views.py:59
+msgid "The file you uploaded is not valid: "
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/views.py:64
+#: local/pretalx-youtube/pretalx_youtube/views.py:78
+msgid "The YouTube URLs were updated."
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/views.py:69
+msgid "Please create a schedule first!"
+msgstr ""
+
+#: local/pretalx-youtube/pretalx_youtube/views.py:75
+msgid "Please fix the errors below."
 msgstr ""
