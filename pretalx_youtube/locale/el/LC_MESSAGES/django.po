@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-03 12:59+0000\n"
+"POT-Creation-Date: 2024-03-05 15:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: local/pretalx-youtube/pretalx_youtube/apps.py:10
+#: local/pretalx-youtube/pretalx_youtube/apps.py:12
 msgid "YouTube integration"
 msgstr ""
 
-#: local/pretalx-youtube/pretalx_youtube/apps.py:13
+#: local/pretalx-youtube/pretalx_youtube/apps.py:15
 msgid ""
 "Show YouTube videos embedded on talk pages. Set URLs manually or via API."
 msgstr ""
