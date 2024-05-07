@@ -6,7 +6,11 @@ from .api import YouTubeLinkViewSet
 from .views import YouTubeSettings
 
 router = routers.SimpleRouter()
-router.register(f"api/events/(?P<event>{SLUG_REGEX})/p/youtube", YouTubeLinkViewSet)
+router.register(
+    f"api/events/(?P<event>{SLUG_REGEX})/p/youtube",
+    YouTubeLinkViewSet,
+    basename="youtube",
+)
 
 urlpatterns = [
     re_path(
