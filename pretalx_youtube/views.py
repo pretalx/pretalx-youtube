@@ -4,7 +4,7 @@ import json
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from pretalx.common.mixins.views import PermissionRequired
+from pretalx.common.views.mixins import PermissionRequired
 
 from .api import YouTubeLinkWriteSerializer
 from .forms import FileUploadForm, YouTubeUrlForm
