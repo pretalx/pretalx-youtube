@@ -3,7 +3,7 @@ Youtube integration
 
 This is a plugin for `pretalx`_ that provides an integration with Youtube, allowing you to embed recordings on talk pages.
 
-![](assets/screenshot.png)
+.. image:: https://github.com/pretalx/pretalx-youtube/blob/main/assets/screenshot.png?raw=true
 
 API
 ---
