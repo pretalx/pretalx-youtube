@@ -1,5 +1,4 @@
 {% extends "orga/base.html" %}
-{% load bootstrap4 %}
 {% load i18n %}
 
 {% block content %}
@@ -27,25 +26,17 @@
             <form method="post" enctype="multipart/form-data" class="d-flex align-items-center
                                                                     ">
                 {% csrf_token %}
-                {% bootstrap_field file_form.file layout='inline' %}
+                {{ file_form.file.as_field_group }}
                 <button name="action" value="upload" type="submit" class="btn btn-outline-success btn-inline btn-sm mb-3">
                     <i class="fa fa-check"></i> {% translate "Import URLs" %}
                 </button>
             </form>
         </div>
         <hr>
-        <form method="post">
-            <p>
-                <h4 class="mb-3">{% translate "Manually" %}</h4>
-            </p>
-            {% csrf_token %}
-            <div class="mr-5">
-                {% bootstrap_form form layout='event' %}
-            </div>
-            <button type="submit" class="btn btn-success btn-lg float-right">
-                <i class="fa fa-check"></i> {% translate "Save" %}
-            </button>
-        </form>
+        <p>
+            <h4 class="mb-3">{% translate "Manually" %}</h4>
+        </p>
+        {% include "orga/includes/base_form.html" %}
     {% else %}
         <div class="alert alert-info">
             {% blocktrans trimmed %}
