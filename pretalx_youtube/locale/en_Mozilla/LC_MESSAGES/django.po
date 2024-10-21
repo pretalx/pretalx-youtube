@@ -57,16 +57,16 @@ msgstr ""
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:12
 msgid ""
-"You can either import YouTube URLs from a CSV file or add them manually. For "
-"the file import, you will have to include a <code>video_id</code> (the part "
-"past the <code>?v=</code> in YouTube, though the full URL works too) and a "
+"You can either import YouTube URLs from a CSV file or add them manually. For"
+" the file import, you will have to include a <code>video_id</code> (the part"
+" past the <code>?v=</code> in YouTube, though the full URL works too) and a "
 "<code>submission</code> column (the ID/code of the submission, e.g. DEXF88)."
 msgstr ""
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:23
 msgid ""
-"If you prefer, you can also use the <a href=\"https://github.com/pretalx/"
-"pretalx-youtube/#readme\">API</a>."
+"If you prefer, you can also use the <a "
+"href=\"https://github.com/pretalx/pretalx-youtube/#readme\">API</a>."
 msgstr ""
 
 #: local/pretalx-youtube/pretalx_youtube/templates/pretalx_youtube/settings.html:32
