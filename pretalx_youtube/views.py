@@ -11,7 +11,7 @@ from .forms import FileUploadForm, YouTubeUrlForm
 
 
 class YouTubeSettings(PermissionRequired, FormView):
-    permission_required = "orga.change_settings"
+    permission_required = "event.update_event"
     template_name = "pretalx_youtube/settings.html"
     form_class = YouTubeUrlForm
 

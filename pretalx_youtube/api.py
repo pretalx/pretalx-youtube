@@ -70,8 +70,8 @@ class YouTubeLinkViewSet(viewsets.ModelViewSet):
     queryset = YouTubeLink.objects.none()
     permission_classes = [ApiPermission & PluginPermission]
     plugin_required = "pretalx_youtube"
-    read_permission_required = "agenda.view_schedule"
-    write_permission_required = "orga.change_settings"
+    read_permission_required = "schedule.list_schedule"
+    write_permission_required = "event.update_event"
     lookup_field = "submission__code"
 
     def get_serializer_class(self):
