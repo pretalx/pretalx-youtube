@@ -1,13 +1,23 @@
 from django.db import models
+from pretalx.agenda.rules import can_view_schedule
+from pretalx.event.rules import can_change_event_settings
+from rules.contrib.models import RulesModelBase, RulesModelMixin
 
 
-class YouTubeLink(models.Model):
+class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):
     submission = models.OneToOneField(
         to="submission.Submission",
         on_delete=models.CASCADE,
         related_name="youtube_link",
     )
     video_id = models.CharField(max_length=20)
+
+    class Meta:
+        rules_permissions = {
+            "list": can_view_schedule,
+            "create": can_change_event_settings,
+            "update": can_change_event_settings,
+        }
 
     @property
     def player_link(self):
