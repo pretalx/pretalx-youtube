@@ -3,4 +3,5 @@ recursive-include pretalx_youtube/templates *
 exclude pretalx_youtube/locale/django.pot
 recursive-include pretalx_youtube/locale *
 recursive-include pretalx_youtube *.py
+recursive-exclude assets *.png
 include Makefile
