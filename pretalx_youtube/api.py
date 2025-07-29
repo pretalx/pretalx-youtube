@@ -83,8 +83,10 @@ class YouTubeLinkViewSet(viewsets.ModelViewSet):
         event = self.request.event
         if not event:
             return YouTubeLink.objects.none()
-        return YouTubeLink.objects.filter(submission__event=event).select_related(
-            "submission"
+        return (
+            YouTubeLink.objects.filter(submission__event=event)
+            .select_related("submission")
+            .order_by("submission__code")
         )
 
     def get_permission_object(self):
