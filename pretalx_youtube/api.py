@@ -74,6 +74,9 @@ class YouTubeLinkViewSet(viewsets.ModelViewSet):
     read_permission_required = "schedule.list_schedule"
     write_permission_required = "event.update_event"
     lookup_field = "submission__code"
+    permission_map = {
+        "bulk_import": "event.update_event",
+    }
 
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):

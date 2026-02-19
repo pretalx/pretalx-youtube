@@ -2,10 +2,16 @@ import datetime as dt
 
 import pytest
 from django.core import management
-from django_scopes import scopes_disabled
+from django_scopes import scope, scopes_disabled
+
+from rest_framework.test import APIClient
 
 from pretalx.event.models import Event, Organiser, Team
-from pretalx.person.models import User
+from pretalx.person.models import SpeakerProfile, User
+from pretalx.schedule.models import Room, TalkSlot
+from pretalx.submission.models import Submission, SubmissionType
+
+from pretalx_youtube.models import YouTubeLink
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -89,6 +95,92 @@ def orga_client(orga_user, client):
 
 
 @pytest.fixture
+def api_client(orga_user):
+    client = APIClient()
+    client.force_authenticate(user=orga_user)
+    return client
+
+
+@pytest.fixture
 def review_client(review_user, client):
     client.force_login(review_user)
     return client
+
+
+@pytest.fixture
+def room(event):
+    with scope(event=event):
+        return Room.objects.create(
+            event=event, name="Testroom", position=1, capacity=50
+        )
+
+
+@pytest.fixture
+def submission_type(event):
+    with scope(event=event):
+        return SubmissionType.objects.create(
+            name="Workshop", event=event, default_duration=60
+        )
+
+
+@pytest.fixture
+def speaker(event):
+    with scopes_disabled():
+        user = User.objects.create_user(
+            password="speakerpwd1!", name="Jane Speaker", email="jane@speaker.org"
+        )
+        profile = SpeakerProfile.objects.create(
+            user=user, event=event, biography="A speaker.", name="Jane"
+        )
+    return profile
+
+
+@pytest.fixture
+def confirmed_submission(event, submission_type, speaker):
+    with scope(event=event):
+        sub = Submission.objects.create(
+            title="Test Talk",
+            submission_type=submission_type,
+            event=event,
+            content_locale="en",
+        )
+        sub.speakers.add(speaker)
+        sub.accept()
+        sub.confirm()
+        return sub
+
+
+@pytest.fixture
+def schedule(event):
+    with scope(event=event):
+        event.release_schedule("v1")
+        return event.current_schedule
+
+
+@pytest.fixture
+def slot(confirmed_submission, room, schedule):
+    with scope(event=room.event):
+        TalkSlot.objects.update_or_create(
+            submission=confirmed_submission,
+            schedule=room.event.wip_schedule,
+            defaults={"is_visible": True},
+        )
+        TalkSlot.objects.update_or_create(
+            submission=confirmed_submission,
+            schedule=schedule,
+            defaults={"is_visible": True},
+        )
+        slots = TalkSlot.objects.filter(submission=confirmed_submission)
+        slots.update(
+            start=room.event.datetime_from,
+            end=room.event.datetime_from + dt.timedelta(minutes=60),
+            room=room,
+        )
+        return slots.get(schedule=schedule)
+
+
+@pytest.fixture
+def youtube_link(confirmed_submission):
+    return YouTubeLink.objects.create(
+        submission=confirmed_submission, video_id="dQw4w9WgXcQ"
+    )

@@ -16,9 +16,14 @@ class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):
     class Meta:
         rules_permissions = {
             "list": can_view_schedule,
+            "view": can_view_schedule,
             "create": can_change_event_settings,
             "update": can_change_event_settings,
         }
+
+    @property
+    def event(self):
+        return self.submission.event
 
     @property
     def player_link(self):
