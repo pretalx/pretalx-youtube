@@ -120,7 +120,7 @@ class YouTubeLinkViewSet(viewsets.ModelViewSet):
             try:
                 data = [
                     line
-                    for line in csv.DictReader(list(data.values())[0].splitlines())
+                    for line in csv.DictReader(next(iter(data.values())).splitlines())
                     if any(line.values())
                 ]
             except Exception:

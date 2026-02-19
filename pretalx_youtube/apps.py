@@ -17,6 +17,9 @@ class PluginApp(AppConfig):
         visible = True
         version = __version__
         category = "RECORDING"
+        settings_links = [
+            (gettext_lazy("Settings"), "plugins:pretalx_youtube:settings", {}),
+        ]
 
     def ready(self):
-        from . import signals  # NOQA
+        from . import signals  # noqa: F401, PLC0415
