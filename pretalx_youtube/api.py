@@ -1,10 +1,11 @@
 import csv
 
-from pretalx.api.permissions import ApiPermission, PluginPermission
-from pretalx.submission.models import Submission
 from rest_framework import parsers, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from pretalx.api.permissions import ApiPermission, PluginPermission
+from pretalx.submission.models import Submission
 
 from .models import YouTubeLink
 

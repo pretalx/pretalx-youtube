@@ -1,7 +1,8 @@
 from django.db import models
+from rules.contrib.models import RulesModelBase, RulesModelMixin
+
 from pretalx.agenda.rules import can_view_schedule
 from pretalx.event.rules import can_change_event_settings
-from rules.contrib.models import RulesModelBase, RulesModelMixin
 
 
 class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):

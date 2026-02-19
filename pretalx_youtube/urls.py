@@ -1,6 +1,7 @@
 from django.urls import re_path
-from pretalx.event.models.event import SLUG_REGEX
 from rest_framework import routers
+
+from pretalx.event.models.event import SLUG_REGEX
 
 from .api import YouTubeLinkViewSet
 from .views import YouTubeSettings

@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
 from pretalx.common.forms.renderers import InlineFormRenderer
 
 from .models import YouTubeLink
