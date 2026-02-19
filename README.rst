@@ -1,6 +1,9 @@
 Youtube integration
 ===================
 
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pretalx/pretalx-youtube/python-coverage-comment-action-data/endpoint.json
+   :target: https://github.com/pretalx/pretalx-youtube/tree/python-coverage-comment-action-data
+
 This is a plugin for `pretalx`_ that provides an integration with Youtube, allowing you to embed recordings on talk pages.
 
 .. image:: https://github.com/pretalx/pretalx-youtube/blob/main/assets/screenshot.png?raw=true
@@ -59,14 +62,20 @@ Development setup
 
 2. Clone this repository, eg to ``local/pretalx-youtube``.
 
-3. Activate the virtual environment you use for pretalx development.
+3. Install the plugin in editable mode: ``uv pip install -e .``
 
-4. Execute ``python setup.py develop`` within this directory to register this application with pretalx's plugin registry.
-
-5. Execute ``make`` within this directory to compile translations.
-
-6. Restart your local pretalx server. You can now use the plugin from this repository for your events by enabling it in
+4. Restart your local pretalx server. You can now use the plugin from this repository for your events by enabling it in
    the 'plugins' tab in the settings.
+
+
+Testing
+~~~~~~~
+
+Run ``just test`` to execute the test suite. This will automatically install pretalx from git if it's not already present.
+
+If you're developing against a local pretalx checkout, use ``just install-pretalx-local /path/to/pretalx`` first.
+
+Use ``just fmt`` to format your code, or ``just fmt-check`` to check formatting without modifying files.
 
 
 License
