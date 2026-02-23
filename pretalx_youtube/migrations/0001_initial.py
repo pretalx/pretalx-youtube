@@ -7,9 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     initial = True
 
-    dependencies = [
-        ("submission", "0062_cfp_settings_data"),
-    ]
+    dependencies = [("submission", "0062_cfp_settings_data")]
 
     operations = [
         migrations.CreateModel(
@@ -31,5 +29,5 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-        ),
+        )
     ]

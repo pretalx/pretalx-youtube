@@ -18,7 +18,7 @@ class PluginApp(AppConfig):
         version = __version__
         category = "RECORDING"
         settings_links = [
-            (gettext_lazy("Settings"), "plugins:pretalx_youtube:settings", {}),
+            (gettext_lazy("Settings"), "plugins:pretalx_youtube:settings", {})
         ]
 
     def ready(self):

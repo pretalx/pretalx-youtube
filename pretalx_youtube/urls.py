@@ -18,6 +18,6 @@ urlpatterns = [
         rf"^orga/event/(?P<event>{SLUG_REGEX})/settings/p/youtube/$",
         YouTubeSettings.as_view(),
         name="settings",
-    ),
+    )
 ]
 urlpatterns += router.urls

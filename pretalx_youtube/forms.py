@@ -57,12 +57,12 @@ class YouTubeUrlForm(forms.Form):
                     url = urlparse(value)
                     qs = parse_qs(url.query)
                     result[key] = qs["v"][0]
-                except Exception:
+                except Exception:  # noqa: BLE001
                     self.add_error(key, _("Failed to parse the URL!"))
             elif "youtu.be" in value:
                 try:
                     result[key] = value.split("/")[-1]
-                except Exception:
+                except Exception:  # noqa: BLE001
                     self.add_error(key, _("Failed to parse the URL!"))
             else:
                 self.add_error(key, _("Please provide a YouTube URL!"))

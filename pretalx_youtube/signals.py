@@ -18,8 +18,7 @@ def youtube_settings(sender, request, **kwargs):
         {
             "label": "YouTube",
             "url": reverse(
-                "plugins:pretalx_youtube:settings",
-                kwargs={"event": request.event.slug},
+                "plugins:pretalx_youtube:settings", kwargs={"event": request.event.slug}
             ),
             "active": request.resolver_match.url_name
             == "plugins:pretalx_youtube:settings",

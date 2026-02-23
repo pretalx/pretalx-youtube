@@ -15,8 +15,7 @@ SETTINGS_URL_NAME = "plugins:pretalx_youtube:settings"
 @pytest.mark.django_db
 def test_orga_can_access_settings(orga_client, event):
     response = orga_client.get(
-        reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug}),
-        follow=True,
+        reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug}), follow=True
     )
     assert response.status_code == 200
 
@@ -24,7 +23,7 @@ def test_orga_can_access_settings(orga_client, event):
 @pytest.mark.django_db
 def test_reviewer_cannot_access_settings(review_client, event):
     response = review_client.get(
-        reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug}),
+        reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
     )
     assert response.status_code == 404
 
@@ -97,10 +96,7 @@ def test_url_form_with_existing_link(event, slot, youtube_link):
 def test_url_form_clean_valid(event, slot, url, expected_id):
     code = slot.submission.code
     with scope(event=event):
-        form = YouTubeUrlForm(
-            data={f"video_id_{code}": url},
-            event=event,
-        )
+        form = YouTubeUrlForm(data={f"video_id_{code}": url}, event=event)
         assert form.is_valid(), form.errors
         assert form.cleaned_data[f"video_id_{code}"] == expected_id
 
@@ -110,8 +106,7 @@ def test_url_form_clean_invalid_url(event, slot):
     code = slot.submission.code
     with scope(event=event):
         form = YouTubeUrlForm(
-            data={f"video_id_{code}": "https://example.com/video"},
-            event=event,
+            data={f"video_id_{code}": "https://example.com/video"}, event=event
         )
         assert not form.is_valid()
 
@@ -120,10 +115,7 @@ def test_url_form_clean_invalid_url(event, slot):
 def test_url_form_clean_empty(event, slot):
     code = slot.submission.code
     with scope(event=event):
-        form = YouTubeUrlForm(
-            data={f"video_id_{code}": ""},
-            event=event,
-        )
+        form = YouTubeUrlForm(data={f"video_id_{code}": ""}, event=event)
         assert form.is_valid()
         assert form.cleaned_data[f"video_id_{code}"] is None
 
@@ -146,10 +138,7 @@ def test_url_form_save_creates_link(event, slot):
 def test_url_form_save_deletes_link(event, slot, youtube_link):
     code = slot.submission.code
     with scope(event=event):
-        form = YouTubeUrlForm(
-            data={f"video_id_{code}": ""},
-            event=event,
-        )
+        form = YouTubeUrlForm(data={f"video_id_{code}": ""}, event=event)
         assert form.is_valid()
         form.save()
     assert not YouTubeLink.objects.filter(submission=slot.submission).exists()
@@ -190,9 +179,7 @@ def test_post_invalid_manual_url(orga_client, event, slot):
     url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
     code = slot.submission.code
     response = orga_client.post(
-        url,
-        data={f"video_id_{code}": "https://example.com/notaurl"},
-        follow=True,
+        url, data={f"video_id_{code}": "https://example.com/notaurl"}, follow=True
     )
     assert response.status_code == 200
     assert not YouTubeLink.objects.filter(submission__code=code).exists()
@@ -207,9 +194,7 @@ def test_upload_json_file(orga_client, event, slot):
         "data.json", data.encode(), content_type="application/json"
     )
     response = orga_client.post(
-        url,
-        data={"action": "upload", "file": upload},
-        follow=True,
+        url, data={"action": "upload", "file": upload}, follow=True
     )
     assert response.status_code == 200
     assert YouTubeLink.objects.filter(
@@ -226,9 +211,7 @@ def test_upload_csv_file(orga_client, event, slot):
         "data.csv", csv_content.encode(), content_type="text/csv"
     )
     response = orga_client.post(
-        url,
-        data={"action": "upload", "file": upload},
-        follow=True,
+        url, data={"action": "upload", "file": upload}, follow=True
     )
     assert response.status_code == 200
     assert YouTubeLink.objects.filter(
@@ -241,9 +224,7 @@ def test_upload_invalid_file_type(orga_client, event, slot):
     url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
     upload = SimpleUploadedFile("data.txt", b"hello", content_type="text/plain")
     response = orga_client.post(
-        url,
-        data={"action": "upload", "file": upload},
-        follow=True,
+        url, data={"action": "upload", "file": upload}, follow=True
     )
     assert response.status_code == 200
 
@@ -251,11 +232,7 @@ def test_upload_invalid_file_type(orga_client, event, slot):
 @pytest.mark.django_db
 def test_upload_no_file(orga_client, event, slot):
     url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
-    response = orga_client.post(
-        url,
-        data={"action": "upload"},
-        follow=True,
-    )
+    response = orga_client.post(url, data={"action": "upload"}, follow=True)
     assert response.status_code == 200
 
 
@@ -267,9 +244,7 @@ def test_upload_invalid_json_content(orga_client, event, slot):
         "data.json", data.encode(), content_type="application/json"
     )
     response = orga_client.post(
-        url,
-        data={"action": "upload", "file": upload},
-        follow=True,
+        url, data={"action": "upload", "file": upload}, follow=True
     )
     assert response.status_code == 200
 
@@ -341,10 +316,7 @@ def test_api_create_duplicate_updates(api_client, event, youtube_link):
 def test_api_create_strips_url_from_video_id(api_client, event, confirmed_submission):
     response = api_client.post(
         f"/api/events/{event.slug}/p/youtube/",
-        data={
-            "submission": confirmed_submission.code,
-            "video_id": "be/abc123",
-        },
+        data={"submission": confirmed_submission.code, "video_id": "be/abc123"},
         format="json",
     )
     assert response.status_code == 201
@@ -355,9 +327,7 @@ def test_api_create_strips_url_from_video_id(api_client, event, confirmed_submis
 def test_api_bulk_import_json(api_client, event, confirmed_submission):
     data = [{"submission": confirmed_submission.code, "video_id": "bulkvid1"}]
     response = api_client.post(
-        f"/api/events/{event.slug}/p/youtube/import/",
-        data=data,
-        format="json",
+        f"/api/events/{event.slug}/p/youtube/import/", data=data, format="json"
     )
     assert response.status_code == 201
     assert YouTubeLink.objects.filter(

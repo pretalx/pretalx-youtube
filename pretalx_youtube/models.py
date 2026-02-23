@@ -21,6 +21,9 @@ class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):
             "update": can_change_event_settings,
         }
 
+    def __str__(self):
+        return f"YouTubeLink({self.video_id})"
+
     @property
     def event(self):
         return self.submission.event
