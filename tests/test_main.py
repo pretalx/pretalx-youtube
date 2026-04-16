@@ -1,13 +1,22 @@
 import json
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django_scopes import scope
 
+from pretalx.agenda.signals import register_recording_provider
+
+from pretalx_youtube.api import (
+    YouTubeLinkSerializer,
+    YouTubeLinkViewSet,
+    YouTubeLinkWriteSerializer,
+)
 from pretalx_youtube.forms import YouTubeUrlForm
 from pretalx_youtube.models import YouTubeLink
 from pretalx_youtube.recording import YouTubeProvider
+from pretalx_youtube.views import YouTubeSettings
 
 SETTINGS_URL_NAME = "plugins:pretalx_youtube:settings"
 
@@ -347,6 +356,78 @@ def test_api_bulk_import_json(api_client, event, confirmed_submission):
     ).exists()
 
 
+@pytest.mark.django_db
+def test_api_bulk_import_parser_returns_none(api_client, event):
+    with patch("pretalx_youtube.api.parsers.FileUploadParser") as mock_cls:
+        mock_instance = MagicMock()
+        mock_instance.parse.return_value = None
+        mock_cls.return_value = mock_instance
+        response = api_client.post(
+            f"/api/events/{event.slug}/p/youtube/import/",
+            data=b"x",
+            content_type="text/csv",
+        )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_api_bulk_import_too_many_files(api_client, event):
+    with patch("pretalx_youtube.api.parsers.FileUploadParser") as mock_cls:
+        mock_instance = MagicMock()
+        mock_instance.parse.return_value = {"a": "1", "b": "2"}
+        mock_cls.return_value = mock_instance
+        response = api_client.post(
+            f"/api/events/{event.slug}/p/youtube/import/",
+            data=b"x",
+            content_type="text/csv",
+        )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_api_bulk_import_csv_file(api_client, event, confirmed_submission):
+    csv_content = f"submission,video_id\n{confirmed_submission.code},csvvid1\n"
+    with patch("pretalx_youtube.api.parsers.FileUploadParser") as mock_cls:
+        mock_instance = MagicMock()
+        mock_instance.parse.return_value = {"file": csv_content}
+        mock_cls.return_value = mock_instance
+        response = api_client.post(
+            f"/api/events/{event.slug}/p/youtube/import/",
+            data=b"x",
+            content_type="text/csv",
+        )
+    assert response.status_code == 201
+    assert YouTubeLink.objects.filter(
+        submission=confirmed_submission, video_id="csvvid1"
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_api_serializer_without_context():
+    serializer = YouTubeLinkSerializer()
+    assert not hasattr(serializer, "event")
+
+
+@pytest.mark.django_db
+def test_api_write_serializer_without_context():
+    serializer = YouTubeLinkWriteSerializer()
+    assert not hasattr(serializer, "event")
+
+
+@pytest.mark.django_db
+def test_api_viewset_queryset_no_event():
+    viewset = YouTubeLinkViewSet()
+    viewset.request = MagicMock(event=None)
+    assert list(viewset.get_queryset()) == []
+
+
+@pytest.mark.django_db
+def test_api_viewset_permission_object(event):
+    viewset = YouTubeLinkViewSet()
+    viewset.request = MagicMock(event=event)
+    assert viewset.get_permission_object() == event
+
+
 # -- Signal tests --
 
 
@@ -355,3 +436,28 @@ def test_nav_event_settings_signal(orga_client, event):
     url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
     response = orga_client.get(url, follow=True)
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_register_recording_provider_signal(event):
+    responses = register_recording_provider.send(sender=event)
+    providers = [r for _, r in responses]
+    assert any(isinstance(p, YouTubeProvider) for p in providers)
+
+
+# -- Misc view/form coverage --
+
+
+def test_get_success_url_returns_request_path():
+    view = YouTubeSettings()
+    view.request = MagicMock(path="/some/settings/path")
+    assert view.get_success_url() == "/some/settings/path"
+
+
+@pytest.mark.django_db
+def test_url_form_rejects_overly_long_id(event, slot):
+    code = slot.submission.code
+    long_url = "https://www.youtube.com/embed/" + "a" * 25
+    with scope(event=event):
+        form = YouTubeUrlForm(data={f"video_id_{code}": long_url}, event=event)
+        assert not form.is_valid()
