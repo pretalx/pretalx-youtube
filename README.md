@@ -5,14 +5,14 @@
 | Name                             |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
 |--------------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
 | pretalx\_youtube/\_\_init\_\_.py |        1 |        0 |        0 |        0 |    100% |           |
-| pretalx\_youtube/api.py          |       84 |       11 |       26 |        7 |     82% |24, 39, 87, 95, 106->108, 111-112, 114, 119-122 |
+| pretalx\_youtube/api.py          |       84 |       11 |       26 |        7 |     82% |24, 39, 87, 95, 106-\>108, 111-112, 114, 119-122 |
 | pretalx\_youtube/apps.py         |       15 |        0 |        0 |        0 |    100% |           |
-| pretalx\_youtube/forms.py        |       45 |        0 |       18 |        0 |    100% |           |
+| pretalx\_youtube/forms.py        |       56 |        1 |       28 |        1 |     98% |        78 |
 | pretalx\_youtube/models.py       |       21 |        0 |        0 |        0 |    100% |           |
 | pretalx\_youtube/recording.py    |        6 |        0 |        2 |        0 |    100% |           |
 | pretalx\_youtube/signals.py      |       10 |        1 |        0 |        0 |     90% |        12 |
 | pretalx\_youtube/views.py        |       56 |        1 |       16 |        0 |     99% |        20 |
-| **TOTAL**                        |  **238** |   **13** |   **62** |    **7** | **93%** |           |
+| **TOTAL**                        |  **249** |   **14** |   **72** |    **8** | **93%** |           |
 
 
 ## Setup coverage badge
