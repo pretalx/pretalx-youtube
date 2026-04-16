@@ -52,20 +52,32 @@ class YouTubeUrlForm(forms.Form):
         for key, value in copy.copy(self.cleaned_data).items():
             if not value:
                 result[key] = None
-            elif "youtube.com" in value:
-                try:
-                    url = urlparse(value)
+                continue
+            video_id = None
+            try:
+                url = urlparse(value)
+                if "youtube.com" in (url.netloc or ""):
                     qs = parse_qs(url.query)
-                    result[key] = qs["v"][0]
-                except Exception:  # noqa: BLE001
-                    self.add_error(key, _("Failed to parse the URL!"))
-            elif "youtu.be" in value:
-                try:
-                    result[key] = value.split("/")[-1]
-                except Exception:  # noqa: BLE001
-                    self.add_error(key, _("Failed to parse the URL!"))
-            else:
+                    if "v" in qs:
+                        video_id = qs["v"][0]
+                    else:
+                        # /embed/<id>, /shorts/<id>, /live/<id>
+                        path_parts = [p for p in url.path.split("/") if p]
+                        if path_parts:
+                            video_id = path_parts[-1]
+                elif "youtu.be" in (url.netloc or ""):
+                    path_parts = [p for p in url.path.split("/") if p]
+                    if path_parts:
+                        video_id = path_parts[0]
+            except Exception:  # noqa: BLE001
+                self.add_error(key, _("Failed to parse the URL!"))
+                continue
+            if not video_id:
                 self.add_error(key, _("Please provide a YouTube URL!"))
+            elif len(video_id) > 20:
+                self.add_error(key, _("Failed to parse the URL!"))
+            else:
+                result[key] = video_id
         return result
 
     def save(self):

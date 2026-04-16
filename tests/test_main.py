@@ -91,6 +91,16 @@ def test_url_form_with_existing_link(event, slot, youtube_link):
     (
         ("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "dQw4w9WgXcQ"),
         ("https://youtu.be/dQw4w9WgXcQ", "dQw4w9WgXcQ"),
+        (
+            "https://youtu.be/dQw4w9WgXcQ?list=PLmfWO7gH1WEvXcXh0KOA3tDmG13Kn10fO",
+            "dQw4w9WgXcQ",
+        ),
+        (
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLmfWO7gH1WEvXcXh0KOA",
+            "dQw4w9WgXcQ",
+        ),
+        ("https://www.youtube.com/embed/dQw4w9WgXcQ", "dQw4w9WgXcQ"),
+        ("https://www.youtube.com/shorts/dQw4w9WgXcQ", "dQw4w9WgXcQ"),
     ),
 )
 def test_url_form_clean_valid(event, slot, url, expected_id):
@@ -102,12 +112,14 @@ def test_url_form_clean_valid(event, slot, url, expected_id):
 
 
 @pytest.mark.django_db
-def test_url_form_clean_invalid_url(event, slot):
+@pytest.mark.parametrize(
+    "url",
+    ("https://example.com/video", "https://www.youtube.com/", "https://youtu.be/"),
+)
+def test_url_form_clean_invalid_url(event, slot, url):
     code = slot.submission.code
     with scope(event=event):
-        form = YouTubeUrlForm(
-            data={f"video_id_{code}": "https://example.com/video"}, event=event
-        )
+        form = YouTubeUrlForm(data={f"video_id_{code}": url}, event=event)
         assert not form.is_valid()
 
 
