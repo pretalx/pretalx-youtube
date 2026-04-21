@@ -1,3 +1,5 @@
+import secrets
+
 from django.db import models
 from rules.contrib.models import RulesModelBase, RulesModelMixin
 
@@ -39,3 +41,19 @@ class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):
     @property
     def iframe(self):
         return f'<div class="embed-responsive embed-responsive-16by9"><iframe src="{self.player_link}" frameborder="0" allowfullscreen></iframe></div>'
+
+
+def generate_webhook_token():
+    return secrets.token_urlsafe(32)
+
+
+class YouTubeWebhookSettings(models.Model):
+    event = models.OneToOneField(
+        to="event.Event",
+        on_delete=models.CASCADE,
+        related_name="youtube_webhook_settings",
+    )
+    token = models.CharField(max_length=128, default=generate_webhook_token)
+
+    def __str__(self):
+        return f"YouTubeWebhookSettings(event={self.event.slug})"

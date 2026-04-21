@@ -1,3 +1,4 @@
+import base64
 import json
 from unittest.mock import MagicMock, patch
 
@@ -14,11 +15,12 @@ from pretalx_youtube.api import (
     YouTubeLinkWriteSerializer,
 )
 from pretalx_youtube.forms import YouTubeUrlForm
-from pretalx_youtube.models import YouTubeLink
+from pretalx_youtube.models import YouTubeLink, YouTubeWebhookSettings
 from pretalx_youtube.recording import YouTubeProvider
-from pretalx_youtube.views import YouTubeSettings
+from pretalx_youtube.views import YouTubeSettings, _find_submission
 
 SETTINGS_URL_NAME = "plugins:pretalx_youtube:settings"
+WEBHOOK_URL_NAME = "plugins:pretalx_youtube:c3voc_webhook"
 
 
 @pytest.mark.django_db
@@ -461,3 +463,460 @@ def test_url_form_rejects_overly_long_id(event, slot):
     with scope(event=event):
         form = YouTubeUrlForm(data={f"video_id_{code}": long_url}, event=event)
         assert not form.is_valid()
+
+
+# -- c3voc webhook tests --
+
+
+VALID_VIDEO_URL = "https://www.youtube.com/watch?v=abcDEF12345"
+VALID_VIDEO_ID = "abcDEF12345"
+
+
+@pytest.fixture
+def webhook_settings(event):
+    return YouTubeWebhookSettings.objects.create(event=event, token="secret-token-xyz")
+
+
+def _payload(event, submission, *, enabled=True, urls=None, conference=None):
+    return {
+        "announcement": None,
+        "is_master": True,
+        "fahrplan": {
+            "conference": conference or event.slug,
+            "guid": None,
+            "id": submission.pk,
+            "language": "eng",
+            "slug": f"{event.slug}-{submission.pk}-test-talk",
+            "title": submission.title,
+        },
+        "voctoweb": {"enabled": False},
+        "youtube": {
+            "enabled": enabled,
+            "privacy": "public",
+            "publish_at": None,
+            "urls": urls if urls is not None else [VALID_VIDEO_URL],
+        },
+        "rclone": {"enabled": False},
+    }
+
+
+def _post_webhook(client, event, payload, *, token=None, header=None):
+    url = reverse(WEBHOOK_URL_NAME, kwargs={"event": event.slug})
+    extra = {}
+    if header is not None:
+        extra["HTTP_AUTHORIZATION"] = header
+    elif token is not None:
+        extra["HTTP_AUTHORIZATION"] = token
+    return client.post(
+        url, data=json.dumps(payload), content_type="application/json", **extra
+    )
+
+
+@pytest.mark.django_db
+def test_webhook_requires_auth(client, event, webhook_settings, confirmed_submission):
+    response = _post_webhook(client, event, _payload(event, confirmed_submission))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_wrong_token(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client, event, _payload(event, confirmed_submission), token="nope"
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_bearer_scheme(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header=f"Bearer {webhook_settings.token}",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_accepts_plain_token(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+    with scope(event=event):
+        link = YouTubeLink.objects.get(submission=confirmed_submission)
+    assert link.video_id == VALID_VIDEO_ID
+
+
+@pytest.mark.django_db
+def test_webhook_accepts_basic_auth(
+    client, event, webhook_settings, confirmed_submission
+):
+    credentials = base64.b64encode(
+        f"voctopublish:{webhook_settings.token}".encode()
+    ).decode()
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header=f"Basic {credentials}",
+    )
+    assert response.status_code == 204
+    with scope(event=event):
+        assert YouTubeLink.objects.filter(submission=confirmed_submission).exists()
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_basic_auth_with_wrong_password(
+    client, event, webhook_settings, confirmed_submission
+):
+    credentials = base64.b64encode(b"voctopublish:wrong").decode()
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header=f"Basic {credentials}",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_basic_auth_without_colon(
+    client, event, webhook_settings, confirmed_submission
+):
+    credentials = base64.b64encode(b"nocolon").decode()
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header=f"Basic {credentials}",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_malformed_basic_auth(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header="Basic !!!not-base64!!!",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_empty_basic_password(
+    client, event, webhook_settings, confirmed_submission
+):
+    credentials = base64.b64encode(b"user:").decode()
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        header=f"Basic {credentials}",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_unknown_event_is_rejected(client, webhook_settings, event):
+    url = reverse(WEBHOOK_URL_NAME, kwargs={"event": event.slug}).replace(
+        event.slug, "doesnotexist"
+    )
+    response = client.post(
+        url,
+        data=json.dumps({}),
+        content_type="application/json",
+        HTTP_AUTHORIZATION=webhook_settings.token,
+    )
+    assert response.status_code in (403, 404)
+
+
+@pytest.mark.django_db
+def test_webhook_plugin_disabled_is_rejected(
+    client, event, webhook_settings, confirmed_submission
+):
+    event.plugins = ""
+    event.save()
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        token=webhook_settings.token,
+    )
+    assert response.status_code in (403, 404)
+
+
+@pytest.mark.django_db
+def test_webhook_without_settings_returns_403(client, event, confirmed_submission):
+    response = _post_webhook(
+        client, event, _payload(event, confirmed_submission), token="anything"
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_non_json(client, event, webhook_settings):
+    url = reverse(WEBHOOK_URL_NAME, kwargs={"event": event.slug})
+    response = client.post(
+        url,
+        data="not json",
+        content_type="application/json",
+        HTTP_AUTHORIZATION=webhook_settings.token,
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_non_object_payload(client, event, webhook_settings):
+    url = reverse(WEBHOOK_URL_NAME, kwargs={"event": event.slug})
+    response = client.post(
+        url,
+        data=json.dumps([1, 2, 3]),
+        content_type="application/json",
+        HTTP_AUTHORIZATION=webhook_settings.token,
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_webhook_disabled_youtube_is_noop(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, enabled=False),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+    with scope(event=event):
+        assert not YouTubeLink.objects.filter(submission=confirmed_submission).exists()
+
+
+@pytest.mark.django_db
+def test_webhook_empty_urls_returns_400(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, urls=[]),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_webhook_urls_wrong_type_returns_400(
+    client, event, webhook_settings, confirmed_submission
+):
+    payload = _payload(event, confirmed_submission)
+    payload["youtube"]["urls"] = "https://youtu.be/abc"
+    response = _post_webhook(client, event, payload, token=webhook_settings.token)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_webhook_no_valid_url_returns_400(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, urls=["https://example.com/foo"]),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_webhook_skips_non_string_url_entries(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, urls=[123, VALID_VIDEO_URL]),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+
+
+@pytest.mark.django_db
+def test_webhook_wrong_conference_returns_404(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, conference="otherconference"),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_webhook_unknown_submission_returns_404(
+    client, event, webhook_settings, confirmed_submission
+):
+    payload = _payload(event, confirmed_submission)
+    payload["fahrplan"]["id"] = 9999999
+    payload["fahrplan"]["slug"] = f"{event.slug}-9999999-nope"
+    response = _post_webhook(client, event, payload, token=webhook_settings.token)
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_webhook_matches_by_slug_when_id_missing(
+    client, event, webhook_settings, confirmed_submission
+):
+    payload = _payload(event, confirmed_submission)
+    payload["fahrplan"]["id"] = None
+    response = _post_webhook(client, event, payload, token=webhook_settings.token)
+    assert response.status_code == 204
+    with scope(event=event):
+        assert YouTubeLink.objects.filter(submission=confirmed_submission).exists()
+
+
+@pytest.mark.django_db
+def test_webhook_updates_existing_link(
+    client, event, webhook_settings, confirmed_submission, youtube_link
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+    with scope(event=event):
+        youtube_link.refresh_from_db()
+    assert youtube_link.video_id == VALID_VIDEO_ID
+
+
+@pytest.mark.django_db
+def test_webhook_only_get_rejected(client, event, webhook_settings):
+    url = reverse(WEBHOOK_URL_NAME, kwargs={"event": event.slug})
+    response = client.get(url, HTTP_AUTHORIZATION=webhook_settings.token)
+    assert response.status_code == 405
+
+
+@pytest.mark.django_db
+def test_settings_page_shows_webhook_config(orga_client, event):
+    url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
+    response = orga_client.get(url)
+    assert response.status_code == 200
+    # Webhook settings should be auto-created
+    settings = YouTubeWebhookSettings.objects.get(event=event)
+    assert settings.token
+    assert settings.token.encode() in response.content
+
+
+@pytest.mark.django_db
+def test_settings_rotate_token(orga_client, event):
+    url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
+    orga_client.get(url)  # auto-create
+    original = YouTubeWebhookSettings.objects.get(event=event).token
+    response = orga_client.post(url, data={"action": "rotate_token"}, follow=True)
+    assert response.status_code == 200
+    new_token = YouTubeWebhookSettings.objects.get(event=event).token
+    assert new_token != original
+
+
+@pytest.mark.django_db
+def test_settings_rotate_creates_settings_if_missing(orga_client, event):
+    YouTubeWebhookSettings.objects.filter(event=event).delete()
+    url = reverse(SETTINGS_URL_NAME, kwargs={"event": event.slug})
+    response = orga_client.post(url, data={"action": "rotate_token"}, follow=True)
+    assert response.status_code == 200
+    assert YouTubeWebhookSettings.objects.filter(event=event).exists()
+
+
+@pytest.mark.django_db
+def test_webhook_youtube_nocookie_url(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(
+            event,
+            confirmed_submission,
+            urls=["https://www.youtube-nocookie.com/embed/abcDEF12345"],
+        ),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+    with scope(event=event):
+        link = YouTubeLink.objects.get(submission=confirmed_submission)
+    assert link.video_id == VALID_VIDEO_ID
+
+
+@pytest.mark.django_db
+def test_webhook_youtube_shorts_url(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, urls=["https://youtu.be/abcDEF12345"]),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 204
+
+
+@pytest.mark.django_db
+def test_webhook_model_str(webhook_settings):
+    assert "YouTubeWebhookSettings" in str(webhook_settings)
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_youtube_com_without_video_id(
+    client, event, webhook_settings, confirmed_submission
+):
+    response = _post_webhook(
+        client,
+        event,
+        _payload(event, confirmed_submission, urls=["https://www.youtube.com/"]),
+        token=webhook_settings.token,
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_find_submission_slug_wrong_prefix(event, confirmed_submission):
+    with scope(event=event):
+        payload = {
+            "fahrplan": {
+                "conference": event.slug,
+                "id": None,
+                "slug": "other-event-42-foo",
+            }
+        }
+        assert _find_submission(event, payload) is None
+
+
+@pytest.mark.django_db
+def test_find_submission_slug_non_numeric_pk(event, confirmed_submission):
+    with scope(event=event):
+        payload = {
+            "fahrplan": {
+                "conference": event.slug,
+                "id": None,
+                "slug": f"{event.slug}-notanumber-foo",
+            }
+        }
+        assert _find_submission(event, payload) is None

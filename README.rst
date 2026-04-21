@@ -55,6 +55,24 @@ upload the file to ``/api/events/<event>/p/youtube/import/`` using a ``POST`` re
 (For JSON, you can also instead put the data in the request body.)
 
 
+c3voc publishing webhook
+------------------------
+
+If you use the c3voc ``voctopublish`` tool to upload recordings to YouTube,
+the plugin can receive the publishing notification and attach the YouTube
+link to the matching session automatically.
+
+Go to the plugin's settings page in the organiser backend to find the
+webhook URL and a freshly-generated token. In your voctopublish ticket,
+configure the webhook URL and set the webhook *password* (``webhook_pass``)
+to the token — leave the username empty so voctopublish uses the
+``Authorization`` header. Always use HTTPS to protect the token in transit.
+
+The token is a shared secret. Anyone who knows it can set YouTube links on
+your sessions, so keep it private. Use the *Generate new token* button in
+the settings to rotate it if you believe it has leaked.
+
+
 Development setup
 -----------------
 
