@@ -45,5 +45,54 @@
         </div>
     {% endif %}
 
+    {% if webhook_settings %}
+        <hr>
+        <h4 class="mb-3">{% translate "c3voc publishing webhook" %}</h4>
+        <p>
+            {% blocktrans trimmed %}
+                If you use the c3voc <code>voctopublish</code> tool to upload
+                recordings to YouTube, pretalx can receive the publishing
+                notification and attach the YouTube link to the matching
+                session automatically.
+            {% endblocktrans %}
+        </p>
+        <p>
+            {% blocktrans trimmed %}
+                In your voctopublish ticket, use the webhook URL below and set
+                the webhook password (<code>webhook_pass</code>) to the token
+                shown here. Leave the username empty so voctopublish sends the
+                token in the <code>Authorization</code> header. Always use
+                HTTPS to protect the token in transit.
+            {% endblocktrans %}
+        </p>
+        <p>
+            {% blocktrans trimmed %}
+                The token is a shared secret. Anyone who knows it can set
+                YouTube links on your sessions, so keep it private. Use the
+                <em>Generate new token</em> button below to rotate it if you
+                believe it has leaked.
+            {% endblocktrans %}
+        </p>
+        <div class="form-group">
+            <label>{% translate "Webhook URL" %}</label>
+            <input type="text" class="form-control" readonly value="{{ webhook_url }}">
+        </div>
+        <div class="form-group">
+            <label>{% translate "Webhook token" %}</label>
+            <input type="text" class="form-control" readonly value="{{ webhook_settings.token }}">
+        </div>
+        <form method="post"
+              hx-post="{{ request.path }}"
+              hx-confirm="{% translate "Generate a new webhook token? The current token will stop working immediately — you will have to reconfigure voctopublish with the new token." %}"
+              hx-target="body"
+              hx-swap="outerHTML"
+              hx-push-url="true">
+            {% csrf_token %}
+            <button name="action" value="rotate_token" type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="fa fa-refresh"></i> {% translate "Generate new token" %}
+            </button>
+        </form>
+    {% endif %}
+
 {% endblock %}
 
