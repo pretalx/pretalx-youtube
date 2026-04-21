@@ -7,12 +7,13 @@
 | pretalx\_youtube/\_\_init\_\_.py |        1 |        0 |        0 |        0 |     100% |           |
 | pretalx\_youtube/api.py          |       84 |        0 |       26 |        0 |     100% |           |
 | pretalx\_youtube/apps.py         |       15 |        0 |        0 |        0 |     100% |           |
-| pretalx\_youtube/forms.py        |       56 |        0 |       28 |        0 |     100% |           |
-| pretalx\_youtube/models.py       |       21 |        0 |        0 |        0 |     100% |           |
+| pretalx\_youtube/forms.py        |       41 |        0 |       16 |        0 |     100% |           |
+| pretalx\_youtube/models.py       |       27 |        0 |        0 |        0 |     100% |           |
 | pretalx\_youtube/recording.py    |        6 |        0 |        2 |        0 |     100% |           |
 | pretalx\_youtube/signals.py      |       10 |        0 |        0 |        0 |     100% |           |
-| pretalx\_youtube/views.py        |       56 |        0 |       16 |        0 |     100% |           |
-| **TOTAL**                        |  **249** |    **0** |   **72** |    **0** | **100%** |           |
+| pretalx\_youtube/utils.py        |       18 |        0 |        8 |        0 |     100% |           |
+| pretalx\_youtube/views.py        |      151 |        0 |       58 |        0 |     100% |           |
+| **TOTAL**                        |  **353** |    **0** |  **110** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
