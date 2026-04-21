@@ -1,5 +1,4 @@
 import copy
-from urllib.parse import parse_qs, urlparse
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -7,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from pretalx.common.forms.renderers import InlineFormRenderer
 
 from .models import YouTubeLink
+from .utils import extract_video_id
 
 
 class FileUploadForm(forms.Form):
@@ -53,29 +53,9 @@ class YouTubeUrlForm(forms.Form):
             if not value:
                 result[key] = None
                 continue
-            video_id = None
-            try:
-                url = urlparse(value)
-                if "youtube.com" in (url.netloc or ""):
-                    qs = parse_qs(url.query)
-                    if "v" in qs:
-                        video_id = qs["v"][0]
-                    else:
-                        # /embed/<id>, /shorts/<id>, /live/<id>
-                        path_parts = [p for p in url.path.split("/") if p]
-                        if path_parts:
-                            video_id = path_parts[-1]
-                elif "youtu.be" in (url.netloc or ""):
-                    path_parts = [p for p in url.path.split("/") if p]
-                    if path_parts:
-                        video_id = path_parts[0]
-            except Exception:  # noqa: BLE001
-                self.add_error(key, _("Failed to parse the URL!"))
-                continue
+            video_id = extract_video_id(value)
             if not video_id:
                 self.add_error(key, _("Please provide a YouTube URL!"))
-            elif len(video_id) > 20:
-                self.add_error(key, _("Failed to parse the URL!"))
             else:
                 result[key] = video_id
         return result
