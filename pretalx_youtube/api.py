@@ -8,6 +8,7 @@ from pretalx.api.permissions import ApiPermission, PluginPermission
 from pretalx.submission.models import Submission
 
 from .models import YouTubeLink
+from .utils import VIDEO_ID_RE
 
 
 class YouTubeLinkSerializer(serializers.ModelSerializer):
@@ -50,6 +51,8 @@ class YouTubeLinkWriteSerializer(YouTubeLinkSerializer):
         if "/" in value:
             parts = [p for p in value.split("/") if p]
             value = parts[-1]
+        if value and not VIDEO_ID_RE.match(value):
+            raise serializers.ValidationError("This is not a valid YouTube video id.")
         return value
 
     def save(self, **kwargs):

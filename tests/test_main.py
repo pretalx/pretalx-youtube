@@ -17,6 +17,7 @@ from pretalx_youtube.api import (
 from pretalx_youtube.forms import YouTubeUrlForm
 from pretalx_youtube.models import YouTubeLink, YouTubeWebhookSettings
 from pretalx_youtube.recording import YouTubeProvider
+from pretalx_youtube.utils import extract_video_id
 from pretalx_youtube.views import YouTubeSettings, _find_submission
 
 SETTINGS_URL_NAME = "plugins:pretalx_youtube:settings"
@@ -50,6 +51,32 @@ def test_youtube_link_properties(youtube_link):
     assert youtube_link.youtube_link == "https://youtube.com/watch?v=dQw4w9WgXcQ"
     assert "iframe" in youtube_link.iframe
     assert youtube_link.player_link in youtube_link.iframe
+
+
+@pytest.mark.django_db
+def test_youtube_link_iframe_escapes_video_id(confirmed_submission):
+    # The iframe is rendered with |safe on the public talk page; even though the
+    # video_id is short and charset-validated on write, the markup itself must
+    # escape it as defence in depth.
+    with scope(event=confirmed_submission.event):
+        link = YouTubeLink.objects.create(
+            submission=confirmed_submission, video_id='"><b>x'
+        )
+    iframe = link.iframe
+    assert "<b>" not in iframe
+    assert "&quot;&gt;&lt;b&gt;" in iframe
+
+
+@pytest.mark.parametrize(
+    "url",
+    (
+        'https://www.youtube.com/watch?v="><b>',
+        "https://www.youtube.com/watch?v=ab cd",
+        "https://www.youtube.com/embed/<script>",
+    ),
+)
+def test_extract_video_id_rejects_non_charset(url):
+    assert extract_video_id(url) is None
 
 
 # -- Recording provider tests --
@@ -344,6 +371,18 @@ def test_api_create_strips_url_from_video_id(api_client, event, confirmed_submis
     )
     assert response.status_code == 201
     assert YouTubeLink.objects.get(submission=confirmed_submission).video_id == "abc123"
+
+
+@pytest.mark.django_db
+def test_api_create_rejects_invalid_video_id(api_client, event, confirmed_submission):
+    response = api_client.post(
+        f"/api/events/{event.slug}/p/youtube/",
+        data={"submission": confirmed_submission.code, "video_id": "not a valid id!"},
+        format="json",
+    )
+    assert response.status_code == 400
+    assert response.data["video_id"] == ["This is not a valid YouTube video id."]
+    assert not YouTubeLink.objects.filter(submission=confirmed_submission).exists()
 
 
 @pytest.mark.django_db

@@ -1,6 +1,7 @@
 import secrets
 
 from django.db import models
+from django.utils.html import format_html
 from rules.contrib.models import RulesModelBase, RulesModelMixin
 
 from pretalx.agenda.rules import can_view_schedule
@@ -40,7 +41,10 @@ class YouTubeLink(RulesModelMixin, models.Model, metaclass=RulesModelBase):
 
     @property
     def iframe(self):
-        return f'<div class="embed-responsive embed-responsive-16by9"><iframe src="{self.player_link}" frameborder="0" allowfullscreen></iframe></div>'
+        return format_html(
+            '<div class="embed-responsive embed-responsive-16by9"><iframe src="{}" frameborder="0" allowfullscreen></iframe></div>',
+            self.player_link,
+        )
 
 
 def generate_webhook_token():
