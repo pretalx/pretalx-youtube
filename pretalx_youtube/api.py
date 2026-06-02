@@ -40,7 +40,7 @@ class YouTubeLinkWriteSerializer(YouTubeLinkSerializer):
             return
         # We only set this here as to not leak all submissions to the API interface
         if self.instance and getattr(self.instance, "submission", None):
-            self.fields["submission"].queryset = self.event.submissions.all().filter(
+            self.fields["submission"].queryset = self.event.submissions.filter(
                 pk=self.instance.submission.pk
             )
         else:
