@@ -83,7 +83,7 @@
         </div>
         <form method="post"
               hx-post="{{ request.path }}"
-              hx-confirm="{% translate "Generate a new webhook token? The current token will stop working immediately — you will have to reconfigure voctopublish with the new token." %}"
+              hx-confirm="{% translate 'Generate a new webhook token? The current token will stop working immediately — you will have to reconfigure voctopublish with the new token.' %}"
               hx-target="body"
               hx-swap="outerHTML"
               hx-push-url="true">
