@@ -2,32 +2,32 @@
 {% load i18n %}
 
 {% block content %}
-
     <h2>{% trans "Set up YouTube embeds" %}</h2>
     {% if form %}
         <div>
             <h4>{% translate "Import" %}</h4>
             <p>
                 {% blocktrans trimmed %}
-
-                    You can either import YouTube URLs from a CSV file or add
-                    them manually. For the file import, you will have to
-                    include a <code>video_id</code> (the part past the
-                    <code>?v=</code> in YouTube, though the full URL works too)
-                    and a <code>submission</code> column (the ID/code of the
-                    submission, e.g. DEXF88).
-
+                    You can either import YouTube URLs from a CSV file or add them manually. For the file import, you
+                    will have to include a <code>video_id</code> (the part past the
+                    <code>?v=</code> in YouTube, though the full URL works too) and a <code>submission</code> column
+                    (the ID/code of the submission, e.g. DEXF88).
                 {% endblocktrans %}
                 <br>
                 {% blocktrans trimmed %}
-                    If you prefer, you can also use the <a href="https://github.com/pretalx/pretalx-youtube/#readme">API</a>.
+                    If you prefer, you can also use the <a href="https://github.com/pretalx/pretalx-youtube/#readme"
+                    >API</a>.
                 {% endblocktrans %}
             </p>
-            <form method="post" enctype="multipart/form-data" class="d-flex align-items-center
-                                                                    ">
+            <form method="post" enctype="multipart/form-data" class="d-flex align-items-center">
                 {% csrf_token %}
                 {{ file_form.file.as_field_group }}
-                <button name="action" value="upload" type="submit" class="btn btn-outline-success btn-inline btn-sm mb-3">
+                <button
+                    name="action"
+                    value="upload"
+                    type="submit"
+                    class="btn btn-outline-success btn-inline btn-sm mb-3"
+                >
                     <i class="fa fa-check"></i> {% translate "Import URLs" %}
                 </button>
             </form>
@@ -50,27 +50,22 @@
         <h4 class="mb-3">{% translate "c3voc publishing webhook" %}</h4>
         <p>
             {% blocktrans trimmed %}
-                If you use the c3voc <code>voctopublish</code> tool to upload
-                recordings to YouTube, pretalx can receive the publishing
-                notification and attach the YouTube link to the matching
-                session automatically.
+                If you use the c3voc <code>voctopublish</code> tool to upload recordings to YouTube, pretalx can receive
+                the publishing notification and attach the YouTube link to the matching session automatically.
             {% endblocktrans %}
         </p>
         <p>
             {% blocktrans trimmed %}
-                In your voctopublish ticket, use the webhook URL below and set
-                the webhook password (<code>webhook_pass</code>) to the token
-                shown here. Leave the username empty so voctopublish sends the
-                token in the <code>Authorization</code> header. Always use
-                HTTPS to protect the token in transit.
+                In your voctopublish ticket, use the webhook URL below and set the webhook password (<code
+                >webhook_pass</code>) to the token shown here. Leave the username empty so voctopublish sends the token
+                in the <code>Authorization</code> header. Always use HTTPS to protect the token in transit.
             {% endblocktrans %}
         </p>
         <p>
             {% blocktrans trimmed %}
-                The token is a shared secret. Anyone who knows it can set
-                YouTube links on your sessions, so keep it private. Use the
-                <em>Generate new token</em> button below to rotate it if you
-                believe it has leaked.
+                The token is a shared secret. Anyone who knows it can set YouTube links on your sessions, so keep it
+                private. Use the
+                <em>Generate new token</em> button below to rotate it if you believe it has leaked.
             {% endblocktrans %}
         </p>
         <div class="form-group">
@@ -81,18 +76,18 @@
             <label>{% translate "Webhook token" %}</label>
             <input type="text" class="form-control" readonly value="{{ webhook_settings.token }}">
         </div>
-        <form method="post"
-              hx-post="{{ request.path }}"
-              hx-confirm="{% translate 'Generate a new webhook token? The current token will stop working immediately — you will have to reconfigure voctopublish with the new token.' %}"
-              hx-target="body"
-              hx-swap="outerHTML"
-              hx-push-url="true">
+        <form
+            method="post"
+            hx-post="{{ request.path }}"
+            hx-confirm="{% translate 'Generate a new webhook token? The current token will stop working immediately — you will have to reconfigure voctopublish with the new token.' %}"
+            hx-target="body"
+            hx-swap="outerHTML"
+            hx-push-url="true"
+        >
             {% csrf_token %}
             <button name="action" value="rotate_token" type="submit" class="btn btn-outline-warning btn-sm">
                 <i class="fa fa-refresh"></i> {% translate "Generate new token" %}
             </button>
         </form>
     {% endif %}
-
 {% endblock %}
-
