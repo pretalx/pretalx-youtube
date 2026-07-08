@@ -5,3 +5,4 @@ recursive-include pretalx_youtube/locale *
 recursive-include pretalx_youtube *.py
 recursive-exclude assets *.png
 include justfile
+include uv.lock
