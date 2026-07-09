@@ -1,8 +1,9 @@
 Youtube integration
 ===================
 
-.. image:: https://raw.githubusercontent.com/pretalx/pretalx-youtube/python-coverage-comment-action-data/badge.svg
-   :target: https://htmlpreview.github.io/?https://github.com/pretalx/pretalx-youtube/blob/python-coverage-comment-action-data/htmlcov/index.html
+.. image:: https://img.shields.io/pypi/v/pretalx-youtube.svg
+   :target: https://pypi.org/project/pretalx-youtube/
+   :alt: PyPI version
 
 This is a plugin for `pretalx`_ that provides an integration with Youtube, allowing you to embed recordings on talk pages.
 
@@ -73,6 +74,20 @@ your sessions, so keep it private. Use the *Generate new token* button in
 the settings to rotate it if you believe it has leaked.
 
 
+Installation
+------------
+
+Install the plugin with pip, in the same environment as your pretalx
+installation::
+
+    (env)$ python -m pip install pretalx-youtube
+
+Afterwards, run ``migrate`` and ``rebuild`` and restart your pretalx services,
+just like after any pretalx update (see `performing updates`_ in the
+administrator documentation).
+
+You can then enable the plugin under "Settings → Plugins" in your event settings.
+
 Development setup
 -----------------
 
@@ -129,3 +144,4 @@ Released under the terms of the Apache License 2.0
 .. _pretalx development setup: https://docs.pretalx.org/en/latest/developer/setup.html
 .. _just: https://just.systems/
 .. _uv: https://docs.astral.sh/uv/
+.. _performing updates: https://docs.pretalx.org/administrator/maintenance/#performing-updates
