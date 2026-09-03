@@ -184,7 +184,7 @@ def slot(confirmed_submission, room, schedule):
             end=room.event.datetime_from + dt.timedelta(minutes=60),
             room=room,
         )
-        return slots.get(schedule=schedule)
+        return slots.select_related("submission").get(schedule=schedule)
 
 
 @pytest.fixture

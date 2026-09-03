@@ -1,9 +1,11 @@
 from pretalx.agenda.recording import BaseRecordingProvider
 
+from .models import YouTubeLink
+
 
 class YouTubeProvider(BaseRecordingProvider):
     def get_recording(self, submission):
-        youtube = getattr(submission, "youtube_link", None)
+        youtube = YouTubeLink.objects.filter(submission=submission).first()
         if youtube:
             return {
                 "iframe": youtube.iframe,

@@ -25,11 +25,14 @@ class YouTubeUrlForm(forms.Form):
         self.talks = (
             event.current_schedule.talks.all()
             .filter(is_visible=True, submission__isnull=False)
+            .select_related("submission", "submission__event")
             .order_by("start")
         )
         youtube_data = {
             v.submission.code: v.youtube_link
-            for v in YouTubeLink.objects.filter(submission__event=event)
+            for v in YouTubeLink.objects.filter(submission__event=event).select_related(
+                "submission"
+            )
         }
         s = _("Go to video.")
         p = _("Go to talk page.")
