@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from pretalx.common.forms.renderers import InlineFormRenderer
+from pretalx.common.forms.widgets import ClearableBasenameFileInput
 
 from .models import YouTubeLink
 from .utils import extract_video_id
@@ -12,7 +13,7 @@ from .utils import extract_video_id
 class FileUploadForm(forms.Form):
     default_renderer = InlineFormRenderer
 
-    file = forms.FileField(label=_("File"))
+    file = forms.FileField(label=_("File"), widget=ClearableBasenameFileInput)
 
 
 class YouTubeUrlForm(forms.Form):
